@@ -1,0 +1,167 @@
+/* JEL-IMS — Phase 13 base UI (60% white / 30% dark blue / 10% accent) */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body.site-body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #1f3a5f;
+}
+
+.site-header {
+    background-color: #1f3a5f;
+    color: #ffffff;
+    padding: 10px;
+}
+
+.site-header__title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: bold;
+}
+
+.layout-shell {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    align-items: stretch;
+    min-height: 0;
+}
+
+.site-sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    background-color: #1f3a5f;
+    color: #ffffff;
+    padding: 12px 0;
+}
+
+.site-sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.site-sidebar li {
+    margin: 0;
+}
+
+.site-sidebar a {
+    display: block;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 8px 14px;
+}
+
+.site-sidebar a:hover {
+    background-color: #4a90e2;
+}
+
+.site-main {
+    flex: 1;
+    min-width: 0;
+    background-color: #ffffff;
+    padding: 15px;
+}
+
+.site-main h1 {
+    margin-top: 0;
+    color: #1f3a5f;
+}
+
+.site-main h2 {
+    color: #1f3a5f;
+}
+
+.site-footer {
+    background-color: #1f3a5f;
+    color: #ffffff;
+    padding: 10px 15px;
+}
+
+.site-footer__text {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.site-main table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+}
+
+.site-main th,
+.site-main td {
+    border: 1px solid gray;
+    padding: 8px;
+    text-align: left;
+}
+
+.site-main th {
+    background-color: #4a90e2;
+    color: #ffffff;
+}
+
+.site-main input[type="text"],
+.site-main input[type="email"],
+.site-main input[type="password"],
+.site-main input[type="date"],
+.site-main select,
+.site-main textarea {
+    padding: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid gray;
+    font-family: Arial, sans-serif;
+}
+
+.site-main button,
+.site-main input[type="submit"] {
+    background-color: #4a90e2;
+    color: #ffffff;
+    padding: 8px;
+    border: none;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+}
+
+.site-main button:hover,
+.site-main input[type="submit"]:hover {
+    filter: brightness(1.05);
+}
+
+.site-main label {
+    display: block;
+    margin-bottom: 4px;
+    color: #1f3a5f;
+}
+
+.site-main form div {
+    margin-bottom: 8px;
+}
+
+.site-main a {
+    color: #4a90e2;
+}
+
+.site-main a:hover {
+    text-decoration: underline;
+}
+
+.site-main ul {
+    margin-bottom: 1rem;
+}
