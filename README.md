@@ -238,3 +238,5 @@ jel_ims/
 ## Security note
 
 This README describes a **local / demonstration** setup. For production: use strong passwords, HTTPS, restricted DB accounts, move sensitive configuration out of the web root, and replace any plain-text seed passwords in the database.
+
+For a full deployment-ready checklist, see `docs/PRODUCTION-HARDENING-CHECKLIST.md`.
