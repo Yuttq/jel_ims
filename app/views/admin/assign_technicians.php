@@ -43,6 +43,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <main class="site-main">
 
 <h1>Assign Technicians</h1>
+<p>Read-only operational monitoring for Admin.</p>
 
 <?php if (!empty($_GET['assigned'])): ?>
 <p>Technician assigned.</p>
@@ -74,19 +75,19 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <p><?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?></p>
 <?php endif; ?>
 
-<h2>Unassigned Bookings</h2>
+<h2>Pending Technician Assignments</h2>
 
 <?php if (count($unassigned) === 0): ?>
-<p>No unassigned bookings.</p>
+<p>No pending technician assignments.</p>
 <?php else: ?>
 <table>
     <tr>
-        <th>ID</th>
+        <th>Booking ID</th>
         <th>Customer</th>
         <th>Service</th>
         <th>Date</th>
-        <th>Time</th>
-        <th>Assign</th>
+        <th>Time Slot</th>
+        <th>Assignment</th>
     </tr>
     <?php foreach ($unassigned as $b): ?>
     <tr>
@@ -95,39 +96,25 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <td><?php echo htmlspecialchars((string) ($b['service_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars((string) ($b['booking_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars((string) ($b['time_value'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-        <td>
-            <form method="post" action="<?php echo htmlspecialchars($jel_ims_web_root . '/app/controllers/TechnicianController.php', ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="booking_id" value="<?php echo (int) $b['id']; ?>">
-                <label for="tech_<?php echo (int) $b['id']; ?>">Technician</label><br>
-                <select id="tech_<?php echo (int) $b['id']; ?>" name="technician_id" required>
-                    <option value="">Select</option>
-                    <?php foreach ($technicians as $t): ?>
-                    <option value="<?php echo (int) $t['id']; ?>">
-                        <?php echo htmlspecialchars((string) ($t['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
-                    </option>
-                    <?php endforeach; ?>
-                </select><br>
-                <button type="submit" name="assign_technician" value="1">Assign</button>
-            </form>
-        </td>
+        <td><span>Managed by Staff</span></td>
     </tr>
     <?php endforeach; ?>
 </table>
 <?php endif; ?>
 
-<h2>Cancel Booking (Admin)</h2>
+<h2>Booking Cancellation Monitoring</h2>
 
 <?php if (count($cancellable) === 0): ?>
 <p>No bookings eligible for cancellation.</p>
 <?php else: ?>
 <table>
     <tr>
-        <th>ID</th>
+        <th>Booking ID</th>
         <th>Customer</th>
         <th>Service</th>
         <th>Date</th>
         <th>Status</th>
-        <th>Cancel</th>
+        <th>Action</th>
     </tr>
     <?php foreach ($cancellable as $b): ?>
     <tr>
@@ -136,14 +123,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <td><?php echo htmlspecialchars((string) ($b['service_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars((string) ($b['booking_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars((string) ($b['status'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-        <td>
-            <form method="post" action="<?php echo htmlspecialchars($jel_ims_web_root . '/app/controllers/BookingController.php', ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="booking_id" value="<?php echo (int) $b['id']; ?>">
-                <label for="adm_reason_<?php echo (int) $b['id']; ?>">Reason</label><br>
-                <textarea id="adm_reason_<?php echo (int) $b['id']; ?>" name="cancellation_reason" rows="2" cols="28" required></textarea><br>
-                <button type="submit" name="cancel_booking" value="1">Cancel booking</button>
-            </form>
-        </td>
+        <td><span>Managed by Staff</span></td>
     </tr>
     <?php endforeach; ?>
 </table>

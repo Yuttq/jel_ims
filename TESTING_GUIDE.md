@@ -29,7 +29,11 @@ Replace with your actual host/path:
 
 All steps below assume you open pages relative to that base (same pattern as the login URL).
 
-**Manage Users:** `{base}/app/views/admin/manage_users.php`
+**Admin Manage Users:** `{base}/app/views/admin/manage_users.php`  
+**Staff Manage Technicians:** `{base}/app/views/staff/manage_technicians.php`  
+**Staff Assign Technicians:** `{base}/app/views/staff/assign_technicians.php`  
+**Staff View Bookings:** `{base}/app/views/staff/view_bookings.php`  
+**Staff Customer Details:** `{base}/app/views/staff/customer_details.php`
 
 ### 1.4 Test accounts
 
@@ -91,29 +95,27 @@ Use a **future** booking date (`YYYY-MM-DD` strictly after today).
 
 ---
 
-## 5. Phase C — Admin (role 1)
+## 5. Phase C — Admin (role 1, oversight)
 
 | Step | Action | Expected result |
 |------|--------|------------------|
 | C1 | **Dashboard** | Loads without errors. |
-| C2 | **Assign Technicians** | Page lists **Unassigned** bookings (may be empty if auto-assignment cleared them). Pick a technician and assign → success when booking is unassigned and technician is not busy in that slot. |
-| C3 | **Technician busy** | Two unassigned bookings, same date + time slot: assign same technician to both → second attempt should fail with a **technician busy** style message. |
-| C4 | **Cancel Booking (Admin)** | Use cancellation form on Assign Technicians page with reason → booking cancelled when rules allow. |
+| C2 | **Assign Technicians page (read-only)** | Page opens and shows monitoring data; assignment/cancel actions are Staff-managed. |
+| C3 | **Operational oversight pages** | Staff pages (`view_bookings`, `customer_details`, `manage_technicians`) open under Admin in read-only mode. |
+| C4 | **Manage Users governance** | Page opens for account governance; Admin/Staff direct create actions are disabled in current workflow. |
 | C5 | **Reports** | Opens; open **Technician workload** and **RFM-style report** (and any links from Reports hub) — pages render; empty tables are OK on a fresh DB. |
 | C6 | **Notifications** | Opens. |
-| C7 | **Manage Users** | Opens via sidebar (**Manage Users**); see **§5.1** for full functional checks (create, edit, deactivate/restore, safety rules). |
+| C7 | **Charts and summary cards** | Reports charts are visible, compact, and responsive (not full-screen stretched). |
 
-### 5.1 Manage Users (extended)
+### 5.1 Manage Users (Admin governance checks)
 
 Use an **Admin** session. Exact status values used by the app are **`Active`** and **`Inactive`** (case-sensitive).
 
 | Step | Action | Expected result |
 |------|--------|------------------|
 | MU1 | Sidebar → **Manage Users** | Page loads; **All users** table shows **ID, Name, Email, Role, Status, Created**, and **Actions**; **no password column** (view page source → no bcrypt-style hashes exposed). |
-| MU2 | **Add Admin or Staff** — create a Staff user | Success message; new row **`Active`** appears in the list. |
-| MU3 | **Add Admin or Staff** — reuse an existing email | Error path; no duplicate row. |
-| MU4 | **Add Technician** — pick **≥ one** skill and submit | Success message (**technician created** style); row appears as Technician; technician has profile + **`technician_skills`** rows (optional DB check below). |
-| MU5 | **Add Technician** — zero skills checked | Validation error (**technician must have at least one skill** style); nothing committed. |
+| MU2 | Attempt direct account creation actions | Creation is disabled in current workflow; governance behavior remains available. |
+| MU3 | Edit user and status with safety guards | Existing protections continue to work (self-deactivate blocked, last active admin blocked, etc.). |
 | MU6 | **Edit** a non-technician user (`?edit=id`) — change name or email → **Save changes** | **User was updated successfully** message; table reflects changes; password unchanged if password fields left blank. |
 | MU7 | **Edit** a user that has a **technician** profile (`technicians.user_id`) | Role is **Technician** and locked (hidden `edit_role_id=3`); you can still update name/email/optional password. |
 | MU8 | **Deactivate** (**Inactive**) on any **Active** user except guarded cases below | **Account status was updated.** user shows **`Inactive`**; that account **cannot log in** (inactive message on login page). |
@@ -147,30 +149,40 @@ Use an account that has a row in **`technicians`** linked to `users.id` (sample 
 | D3 | Valid transitions | From **Assigned** → **Ongoing** or **Completed** or **No-Show** where allowed; success feedback. |
 | D4 | Invalid transition | Wrong jump (e.g. skipping allowed states) → error / no silent success. |
 | D5 | **No-Show** | When applied from an allowed state, booking updates; customer **no_show_count** can increment (verify in DB if needed). |
-| D6 | **Notifications** | Opens. |
+| D6 | **Notifications** | Opens; booking-linked notifications can open technician booking details page. |
+| D7 | **Dashboard booking links** | "View booking" opens the same technician booking details page. |
 
-**Optional direct URLs** (not all are in the sidebar):
+**Optional direct URL:**
 
-- Assigned services list:  
-  `{base}/app/views/technician/assigned_services.php`
+- Technician booking details:  
+  `{base}/app/views/technician/booking_details.php?booking_id=<id>`
 
 ---
 
-## 7. Phase E — Staff (role 2)
+## 7. Phase E — Staff (role 2, operational center)
 
 | Step | Action | Expected result |
 |------|--------|------------------|
 | E1 | Log in as **staff1@jelims.test** | Staff dashboard; metrics (today’s bookings, ongoing, unassigned) show numbers. |
-| E2 | **Notifications** | Opens. |
-
-**Optional placeholder pages** (no sidebar links; open manually if you want to confirm they load):
-
-- `{base}/app/views/staff/view_bookings.php` — placeholder text.
-- `{base}/app/views/staff/monitor_services.php` — placeholder text.
+| E2 | **Manage Technicians** | Create/edit/deactivate/reactivate technician accounts works. |
+| E3 | **Assign Technicians** | Assignment and cancellation operations work for Staff. |
+| E4 | **View Bookings** | Booking list renders with customer/technician/status details. |
+| E5 | **Customer Details** | Customer list/search and per-customer booking history work. |
+| E6 | **Notifications** | Opens. |
 
 ---
 
-## 8. Phase F — Regression bundle (quick)
+## 8. Phase F — Visibility checks
+
+| Check | How | Expected |
+|--------|-----|----------|
+| Customer status label clarity | View customer booking with DB status `Unassigned` | UI label shows **Pending Technician Assignment**. |
+| Customer technician visibility | Open assigned booking in customer history | Technician name/email/role are shown. |
+| Staff booking/customer status label clarity | Open Staff booking/customer pages for unassigned rows | Label shows **Pending Technician Assignment**. |
+
+---
+
+## 9. Phase G — Regression bundle (quick)
 
 Run these anytime after changes:
 
@@ -183,7 +195,7 @@ Run these anytime after changes:
 
 ---
 
-## 9. Optional database checks
+## 10. Optional database checks
 
 If something looks wrong, confirm in MySQL (phpMyAdmin or CLI):
 
@@ -194,7 +206,7 @@ If something looks wrong, confirm in MySQL (phpMyAdmin or CLI):
 
 ---
 
-## 10. Pass/fail log (template)
+## 11. Pass/fail log (template)
 
 | Phase | Pass? | Notes |
 |-------|-------|-------|
@@ -203,7 +215,8 @@ If something looks wrong, confirm in MySQL (phpMyAdmin or CLI):
 | C — Admin | ☐ | |
 | D — Technician | ☐ | |
 | E — Staff | ☐ | |
-| F — Regression | ☐ | |
+| F — Visibility | ☐ | |
+| G — Regression | ☐ | |
 
 Date tested: _______________  
 Tester: _______________  

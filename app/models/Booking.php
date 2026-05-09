@@ -127,10 +127,16 @@ class Booking
         $sql = 'SELECT b.id, b.user_id, b.technician_id, b.service_id, b.booking_date, b.time_slot_id,
                        b.status, b.cancellation_reason, b.rescheduled_from_booking_id,
                        b.created_by, b.updated_by, b.updated_at, b.created_at,
-                       s.service_name, ts.time_value
+                       s.service_name, ts.time_value,
+                       tu.full_name AS technician_name,
+                       tu.email AS technician_email,
+                       r.role_name AS technician_role
                 FROM bookings b
                 INNER JOIN services s ON b.service_id = s.id
                 INNER JOIN time_slots ts ON b.time_slot_id = ts.id
+                LEFT JOIN technicians t ON b.technician_id = t.id
+                LEFT JOIN users tu ON t.user_id = tu.id
+                LEFT JOIN roles r ON tu.role_id = r.id
                 WHERE b.user_id = :user_id
                 ORDER BY b.booking_date DESC, b.time_slot_id DESC';
 
@@ -490,5 +496,54 @@ class Booking
             (int) $time_slot_id,
             (int) $exclude_booking_id
         );
+    }
+
+    /**
+     * @param int $technicianUserId users.id
+     * @return array
+     */
+    public function getBookingsByTechnicianUser($technicianUserId)
+    {
+        $sql = 'SELECT b.id, b.booking_date, b.status, s.service_name, ts.time_value
+                FROM bookings b
+                INNER JOIN technicians t ON t.id = b.technician_id
+                INNER JOIN services s ON s.id = b.service_id
+                INNER JOIN time_slots ts ON ts.id = b.time_slot_id
+                WHERE t.user_id = :uid AND b.status IN (\'Assigned\', \'Ongoing\', \'Completed\')
+                ORDER BY b.booking_date ASC, b.time_slot_id ASC';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':uid', $technicianUserId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param int $bookingId
+     * @param int $technicianUserId users.id
+     * @return array|false
+     */
+    public function getBookingDetailForTechnician($bookingId, $technicianUserId)
+    {
+        $sql = 'SELECT b.id, b.booking_date, b.status, b.created_at,
+                       s.service_name, ts.time_value,
+                       cu.full_name AS customer_name, cu.email AS customer_email,
+                       c.contact_number AS customer_contact, c.address AS customer_address,
+                       tu.full_name AS technician_name, tu.email AS technician_email
+                FROM bookings b
+                INNER JOIN technicians t ON t.id = b.technician_id
+                INNER JOIN users tu ON tu.id = t.user_id
+                INNER JOIN users cu ON cu.id = b.user_id
+                LEFT JOIN customers c ON c.user_id = cu.id
+                INNER JOIN services s ON s.id = b.service_id
+                INNER JOIN time_slots ts ON ts.id = b.time_slot_id
+                WHERE b.id = :bid AND t.user_id = :uid
+                LIMIT 1';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':bid', $bookingId, PDO::PARAM_INT);
+        $stmt->bindParam(':uid', $technicianUserId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: false;
     }
 }

@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../controllers/NotificationController.php';
 
 $notificationController = new NotificationController();
 $sessionUserId = (int) $_SESSION['user_id'];
+$sessionRoleId = (int) $_SESSION['role_id'];
 $allNotifications = $notificationController->getUserNotifications($sessionUserId);
 
 $unread = [];
@@ -46,6 +47,7 @@ require_once __DIR__ . '/sidebar.php';
         <th>Booking</th>
         <th>Created</th>
         <th>Action</th>
+        <th>Details</th>
     </tr>
     <?php foreach ($unread as $n): ?>
     <tr>
@@ -58,6 +60,13 @@ require_once __DIR__ . '/sidebar.php';
                 <input type="hidden" name="notification_id" value="<?php echo (int) $n['id']; ?>">
                 <button type="submit" name="mark_notification_read" value="1">Mark as read</button>
             </form>
+        </td>
+        <td>
+            <?php if ($sessionRoleId === 3 && !empty($n['booking_id'])): ?>
+            <a href="<?php echo htmlspecialchars($jel_ims_web_root . '/app/views/technician/booking_details.php?booking_id=' . (int) $n['booking_id'], ENT_QUOTES, 'UTF-8'); ?>">Open booking</a>
+            <?php else: ?>
+            <span>N/A</span>
+            <?php endif; ?>
         </td>
     </tr>
     <?php endforeach; ?>

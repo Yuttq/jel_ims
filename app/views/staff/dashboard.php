@@ -41,6 +41,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <main class="site-main">
 
 <h1>Staff Dashboard</h1>
+<p>Operational control center for technician and booking coordination.</p>
 
 <table>
     <tr>
@@ -60,6 +61,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <td><?php echo htmlspecialchars((string) $unassignedBookings, ENT_QUOTES, 'UTF-8'); ?></td>
     </tr>
 </table>
+
+<p>
+    <a href="manage_technicians.php">Manage Technicians</a> |
+    <a href="view_bookings.php">View Bookings</a> |
+    <a href="assign_technicians.php">Assign Technicians</a> |
+    <a href="customer_details.php">Customer Details</a>
+</p>
 
 </main>
 

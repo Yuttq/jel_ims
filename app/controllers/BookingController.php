@@ -148,7 +148,7 @@ if (!empty($_POST['cancel_booking'])) {
     $roleId = (int) $_SESSION['role_id'];
     $sessionUserId = (int) $_SESSION['user_id'];
 
-    if ($roleId !== 1 && $roleId !== 4) {
+    if ($roleId !== 1 && $roleId !== 2 && $roleId !== 4) {
         header('Location: ../views/auth/login.php?error=forbidden');
         exit;
     }
@@ -159,7 +159,9 @@ if (!empty($_POST['cancel_booking'])) {
     if ($booking_id < 1 || $reason === '') {
         $target = $roleId === 4
             ? '../views/customer/booking_history.php?error=cancel_invalid'
-            : '../views/admin/assign_technicians.php?error=cancel_invalid';
+            : (($roleId === 2)
+                ? '../views/staff/assign_technicians.php?error=cancel_invalid'
+                : '../views/admin/assign_technicians.php?error=cancel_invalid');
         header('Location: ' . $target);
         exit;
     }
@@ -169,7 +171,9 @@ if (!empty($_POST['cancel_booking'])) {
     if (!$booking) {
         $target = $roleId === 4
             ? '../views/customer/booking_history.php?error=cancel_invalid'
-            : '../views/admin/assign_technicians.php?error=cancel_invalid';
+            : (($roleId === 2)
+                ? '../views/staff/assign_technicians.php?error=cancel_invalid'
+                : '../views/admin/assign_technicians.php?error=cancel_invalid');
         header('Location: ' . $target);
         exit;
     }
@@ -182,14 +186,18 @@ if (!empty($_POST['cancel_booking'])) {
     if (!$bookingModel->cancelBooking($booking_id, $reason, $sessionUserId)) {
         $target = $roleId === 4
             ? '../views/customer/booking_history.php?error=cancel_failed'
-            : '../views/admin/assign_technicians.php?error=cancel_failed';
+            : (($roleId === 2)
+                ? '../views/staff/assign_technicians.php?error=cancel_failed'
+                : '../views/admin/assign_technicians.php?error=cancel_failed');
         header('Location: ' . $target);
         exit;
     }
 
     $target = $roleId === 4
         ? '../views/customer/booking_history.php?cancelled=1'
-        : '../views/admin/assign_technicians.php?cancelled=1';
+        : (($roleId === 2)
+            ? '../views/staff/assign_technicians.php?cancelled=1'
+            : '../views/admin/assign_technicians.php?cancelled=1');
     header('Location: ' . $target);
     exit;
 }

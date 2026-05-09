@@ -28,7 +28,10 @@ $nb = $jel_ims_web_root;
         <?php if ($jel_ims_nav_role === 1): ?>
         <li><a href="<?php echo htmlspecialchars($nb . '/app/views/admin/dashboard.php', ENT_QUOTES, 'UTF-8'); ?>">Dashboard</a></li>
         <li><a href="<?php echo htmlspecialchars($nb . '/app/views/admin/manage_users.php', ENT_QUOTES, 'UTF-8'); ?>">Manage Users</a></li>
-        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/admin/assign_technicians.php', ENT_QUOTES, 'UTF-8'); ?>">Assign Technicians</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/manage_technicians.php', ENT_QUOTES, 'UTF-8'); ?>">Technician Records</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/view_bookings.php', ENT_QUOTES, 'UTF-8'); ?>">Booking Details</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/assign_technicians.php', ENT_QUOTES, 'UTF-8'); ?>">Assignments</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/customer_details.php', ENT_QUOTES, 'UTF-8'); ?>">Customer Details</a></li>
         <li><a href="<?php echo htmlspecialchars($nb . '/app/views/admin/reports.php', ENT_QUOTES, 'UTF-8'); ?>">Reports</a></li>
         <li><a href="<?php echo htmlspecialchars($nb . '/app/views/layouts/notifications.php', ENT_QUOTES, 'UTF-8'); ?>">Notifications</a></li>
         <li><a href="<?php echo htmlspecialchars($nb . '/public/logout.php', ENT_QUOTES, 'UTF-8'); ?>">Logout</a></li>
@@ -36,6 +39,10 @@ $nb = $jel_ims_web_root;
 
         <?php if ($jel_ims_nav_role === 2): ?>
         <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/dashboard.php', ENT_QUOTES, 'UTF-8'); ?>">Dashboard</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/manage_technicians.php', ENT_QUOTES, 'UTF-8'); ?>">Manage Technicians</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/view_bookings.php', ENT_QUOTES, 'UTF-8'); ?>">View Bookings</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/assign_technicians.php', ENT_QUOTES, 'UTF-8'); ?>">Assign Technicians</a></li>
+        <li><a href="<?php echo htmlspecialchars($nb . '/app/views/staff/customer_details.php', ENT_QUOTES, 'UTF-8'); ?>">Customer Details</a></li>
         <li><a href="<?php echo htmlspecialchars($nb . '/app/views/layouts/notifications.php', ENT_QUOTES, 'UTF-8'); ?>">Notifications</a></li>
         <li><a href="<?php echo htmlspecialchars($nb . '/public/logout.php', ENT_QUOTES, 'UTF-8'); ?>">Logout</a></li>
         <?php endif; ?>

@@ -49,7 +49,7 @@ $sessionRole = (int) $_SESSION['role_id'];
 $bookingModel = new Booking();
 
 if (!empty($_POST['assign_technician'])) {
-    if ($sessionRole !== 1) {
+    if ($sessionRole !== 2) {
         header('Location: ../views/auth/login.php?error=forbidden');
         exit;
     }
@@ -58,25 +58,25 @@ if (!empty($_POST['assign_technician'])) {
     $technician_id = isset($_POST['technician_id']) ? (int) $_POST['technician_id'] : 0;
 
     if ($booking_id < 1 || $technician_id < 1) {
-        header('Location: ../views/admin/assign_technicians.php?error=assign_invalid');
+        header('Location: ../views/staff/assign_technicians.php?error=assign_invalid');
         exit;
     }
 
     $booking = $bookingModel->getBookingById($booking_id);
 
     if (!$booking) {
-        header('Location: ../views/admin/assign_technicians.php?error=assign_invalid');
+        header('Location: ../views/staff/assign_technicians.php?error=assign_invalid');
         exit;
     }
 
     if ((string) $booking['status'] !== 'Unassigned') {
-        header('Location: ../views/admin/assign_technicians.php?error=assign_state');
+        header('Location: ../views/staff/assign_technicians.php?error=assign_state');
         exit;
     }
 
     $existingTech = $booking['technician_id'];
     if ($existingTech !== null && $existingTech !== '' && (int) $existingTech > 0) {
-        header('Location: ../views/admin/assign_technicians.php?error=assign_state');
+        header('Location: ../views/staff/assign_technicians.php?error=assign_state');
         exit;
     }
 
@@ -86,16 +86,16 @@ if (!empty($_POST['assign_technician'])) {
         (int) $booking['time_slot_id'],
         $booking_id
     )) {
-        header('Location: ../views/admin/assign_technicians.php?error=technician_busy');
+        header('Location: ../views/staff/assign_technicians.php?error=technician_busy');
         exit;
     }
 
     if (!$bookingModel->assignTechnician($booking_id, $technician_id, 'Assigned', $sessionUserId)) {
-        header('Location: ../views/admin/assign_technicians.php?error=assign_failed');
+        header('Location: ../views/staff/assign_technicians.php?error=assign_failed');
         exit;
     }
 
-    header('Location: ../views/admin/assign_technicians.php?assigned=1');
+    header('Location: ../views/staff/assign_technicians.php?assigned=1');
     exit;
 }
 

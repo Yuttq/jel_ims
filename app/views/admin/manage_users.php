@@ -116,6 +116,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         'status_technician_busy' => 'Technician still has Assigned or Ongoing bookings. Resolve those first.',
         'status_save' => 'Could not save the new status.',
         'status_server' => 'A database error occurred. Please try again.',
+        'create_disabled' => 'Direct creation of Admin/Staff accounts is disabled in this workflow.',
+        'forbidden' => 'You are not allowed to perform this action.',
+        'staff_only_technician' => 'Staff can only manage technician accounts.',
     ];
     $msg = isset($messages[$code]) ? $messages[$code] : 'Something went wrong. Please try again.';
 ?>
@@ -179,81 +182,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </form>
 <?php endif; ?>
 
-<h2>Add Admin or Staff</h2>
-<p>Creates an <strong>Active</strong> account with a secure password (<code>password_hash</code>).</p>
-
-<form method="post" action="<?php echo htmlspecialchars($jel_ims_web_root . '/app/controllers/UserController.php', ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="jel_action" value="create_user">
-    <div>
-        <label for="cu_full_name">Full name</label><br>
-        <input id="cu_full_name" type="text" name="full_name" maxlength="100" autocomplete="name" required>
-    </div>
-    <div>
-        <label for="cu_email">Email</label><br>
-        <input id="cu_email" type="email" name="email" maxlength="100" autocomplete="username" required>
-    </div>
-    <div>
-        <label for="cu_role">Role</label><br>
-        <select id="cu_role" name="role_id" required>
-            <option value="1">Admin</option>
-            <option value="2" selected>Staff</option>
-        </select>
-    </div>
-    <div>
-        <label for="cu_password">Password</label><br>
-        <input id="cu_password" type="password" name="password" minlength="8" maxlength="255" autocomplete="new-password" required>
-    </div>
-    <div>
-        <label for="cu_password_confirm">Confirm password</label><br>
-        <input id="cu_password_confirm" type="password" name="password_confirm" minlength="8" maxlength="255" autocomplete="new-password" required>
-    </div>
-    <div>
-        <input type="submit" value="Create user">
-    </div>
-</form>
-
-<h2>Add Technician</h2>
-<p>Creates a Technician user (<code>role_id = 3</code>), a matching <strong>technicians</strong> row, and one or more <strong>technician_skills</strong> in a single transaction. Availability defaults to <strong>Available</strong>.</p>
-
-<form method="post" action="<?php echo htmlspecialchars($jel_ims_web_root . '/app/controllers/UserController.php', ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="jel_action" value="create_technician">
-    <div>
-        <label for="tec_full_name">Full name</label><br>
-        <input id="tec_full_name" type="text" name="tech_full_name" maxlength="100" autocomplete="name" required>
-    </div>
-    <div>
-        <label for="tec_email">Email</label><br>
-        <input id="tec_email" type="email" name="tech_email" maxlength="100" autocomplete="username" required>
-    </div>
-    <div>
-        <label for="tec_password">Password</label><br>
-        <input id="tec_password" type="password" name="tech_password" minlength="8" maxlength="255" autocomplete="new-password" required>
-    </div>
-    <div>
-        <label for="tec_password_confirm">Confirm password</label><br>
-        <input id="tec_password_confirm" type="password" name="tech_password_confirm" minlength="8" maxlength="255" autocomplete="new-password" required>
-    </div>
-    <fieldset>
-        <legend>Skills (choose at least one)</legend>
-        <?php if (empty($skillServices)): ?>
-        <p>No services configured in the database.</p>
-        <?php else: ?>
-        <?php foreach ($skillServices as $svc): ?>
-        <?php
-            $svcId = (int) ($svc['id'] ?? 0);
-            $svcName = (string) ($svc['service_name'] ?? '');
-        ?>
-        <div>
-            <input type="checkbox" name="service_ids[]" value="<?php echo $svcId; ?>" id="<?php echo 'svc_chk_' . $svcId; ?>">
-            <label for="<?php echo 'svc_chk_' . $svcId; ?>"><?php echo htmlspecialchars($svcName, ENT_QUOTES, 'UTF-8'); ?></label>
-        </div>
-        <?php endforeach; ?>
-        <?php endif; ?>
-    </fieldset>
-    <div>
-        <input type="submit" value="Create technician">
-    </div>
-</form>
+<p>Administrative account creation and technician operational creation have been moved out of the Admin area. This page remains for account governance and system oversight.</p>
 
 <h2>All users</h2>
 

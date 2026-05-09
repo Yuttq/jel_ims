@@ -56,6 +56,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <th>Service Name</th>
         <th>Booking Date</th>
         <th>Time Slot</th>
+        <th>Technician Name</th>
+        <th>Technician Email</th>
+        <th>Technician Role</th>
         <th>Status</th>
         <th>Cancel</th>
     </tr>
@@ -63,12 +66,16 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <?php
         $st = (string) $r['status'];
         $canCancel = in_array($st, ['Unassigned', 'Assigned', 'Ongoing'], true);
+        $statusLabel = ($st === 'Unassigned') ? 'Pending Technician Assignment' : $st;
     ?>
     <tr>
         <td><?php echo htmlspecialchars($r['service_name'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($r['booking_date'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($r['time_value'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars((string) ($r['technician_name'] ?? 'Not yet assigned'), ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars((string) ($r['technician_email'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars((string) ($r['technician_role'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?></td>
         <td>
             <?php if ($canCancel): ?>
             <form method="post" action="<?php echo htmlspecialchars($jel_ims_web_root . '/app/controllers/BookingController.php', ENT_QUOTES, 'UTF-8'); ?>">

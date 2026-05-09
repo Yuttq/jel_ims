@@ -89,14 +89,21 @@ Logout: use **Logout** in the sidebar, or visit `/public/logout.php` under your 
 
 ---
 
-## Roles and how accounts are created
+## Roles and account creation (current workflow)
 
 | Role ID | Role | How to get an account |
 |---------|------|------------------------|
-| 1 | Admin | Seeded (`admin@jelims.com`). |
-| 2 | Staff | Not seeded; add manually in the database (see below). **Manage Users** in the UI is currently a placeholder. |
-| 3 | Technician | Same as Staff — manual DB setup (user + `technicians` + `technician_skills`). |
+| 1 | Admin | Seeded (`admin@jelims.com`). Admin handles oversight, reports, and account governance. |
+| 2 | Staff | Not seeded; add first Staff user manually in the database (see below). Staff handles daily operations. |
+| 3 | Technician | Created by Staff in **Manage Technicians** (or manual DB setup), with skills. |
 | 4 | Customer | **Register** from the login page (`Register` link). |
+
+### Responsibility split
+
+- **Admin:** monitoring, read-only operational oversight, reports, system access governance.
+- **Staff:** technician account lifecycle (create/edit/deactivate/reactivate), assignment, booking operations.
+- **Technician:** booking detail visibility via notifications/dashboard, service status updates.
+- **Customer:** booking creation/history, visibility of assigned technician details.
 
 ---
 
@@ -124,30 +131,34 @@ While logged in as a customer:
 - [ ] **Cancel booking** (where offered): booking updates or removes appropriately.
 - [ ] **Notifications** page opens (may be empty or list items after actions).
 
-### D. Admin (role 1)
+### D. Admin (role 1, oversight)
 
 Log back in as admin:
 
 - [ ] **Dashboard** loads.
-- [ ] **Assign Technicians:** lists unassigned work; assigning a technician succeeds when no conflict.
+- [ ] **Operational oversight pages:** assignment/bookings/customer/technician pages load in read-only mode.
 - [ ] **Reports** hub opens; open **Technician workload**, **RFM-style report**, or other linked reports — pages render (empty tables are OK on a fresh DB).
 - [ ] **Notifications** opens.
+- [ ] **Manage Users** opens for account governance (Admin/Staff direct creation is disabled in current workflow).
 
-### E. Staff (role 2) — optional
+### E. Staff (role 2)
 
 Create a Staff user in MySQL (see [Manual test users](#manual-test-users)), then:
 
 - [ ] Login → Staff dashboard.
+- [ ] **Manage Technicians:** create/edit/deactivate/reactivate technician accounts.
+- [ ] **Assign Technicians:** assign pending bookings and process cancellations.
+- [ ] **View Bookings:** list loads with customer/technician/status details.
+- [ ] **Customer Details:** customer search/list and booking history load.
 - [ ] **Notifications** works.
 
-*(Staff-specific booking views exist in the menu structure; confirm pages load for your deployment.)*
-
-### F. Technician (role 3) — optional
+### F. Technician (role 3)
 
 Requires a user with role Technician, a row in `technicians`, and at least one `technician_skills` row for a service you book (see [Manual test users](#manual-test-users)).
 
 - [ ] Login → Technician dashboard.
-- [ ] **Assigned services** shows bookings assigned to this technician when present.
+- [ ] **Dashboard booking list** shows assigned bookings and links to booking details.
+- [ ] **Notifications** can open booking details for booking-linked notifications.
 - [ ] **Update Status:** valid transitions apply (e.g. toward Completed); invalid transitions should be rejected or messaged appropriately.
 - [ ] After marking **No-Show** where applicable, verify behavior matches expectations (e.g. customer no-show tracking in DB).
 
@@ -227,5 +238,3 @@ jel_ims/
 ## Security note
 
 This README describes a **local / demonstration** setup. For production: use strong passwords, HTTPS, restricted DB accounts, move sensitive configuration out of the web root, and replace any plain-text seed passwords in the database.
-#   j e l _ i m s  
- 

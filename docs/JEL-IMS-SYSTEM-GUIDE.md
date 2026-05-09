@@ -102,7 +102,7 @@ flowchart LR
 - Stored in **database**, not hard-coded strings on the user row (except redirects that use numeric IDs).
 - `AuthController` redirects after login using **`role_id`** with a `switch` (1→admin dashboard, 2→staff, 3→technician, 4→customer).
 - `sidebar.php` shows navigation based on `$_SESSION['role_id']`.
-- Controllers re-check `role_id` for sensitive actions (e.g. `UserController` requires Admin; `BookingController` requires Customer for create; `TechnicianController` restricts manual assign to Admin).
+- Controllers re-check `role_id` for sensitive actions (e.g. `UserController` allows Admin/Staff session access but constrains Staff to technician-focused actions; `BookingController` requires Customer for create; `TechnicianController` restricts manual assign to Staff).
 
 ### 2.2 Users (`users`) — focus table
 
@@ -189,10 +189,10 @@ Many-to-many between **technician** and **service** (skill = able to perform tha
 
 **B) Admin creates Admin or Staff** — `UserController.php`, action `create_user`:
 
-- Allowed `role_id`: **1 or 2** only.
-- Stronger validation: email format, password length ≥ 8, confirm match, duplicate email check.
+- In the current workflow, direct account creation from this action is intentionally disabled.
+- Admin still handles governance/oversight, while operations are handled in Staff pages.
 
-**C) Admin creates Technician** — `UserController.php`, action `create_technician`:
+**C) Staff creates Technician** — `UserController.php`, action `create_technician`:
 
 - Single **transaction**: insert `users` (role 3), insert `technicians`, insert **≥ 1** `technician_skills` rows.
 - Uses `createUserOnConnection`, `createTechnicianOnConnection`, `insertTechnicianSkillsOnConnection`.
@@ -238,7 +238,8 @@ All three steps are wrapped in a **PDO transaction** in `UserController::jel_ims
 | `getAvailableTechnicians()` | `availability_status = 'Available'`. |
 | `getTechniciansByService($service_id)` | Joins `technician_skills` for that service. |
 
-**Admin assign UI** (`assign_technicians.php`) loads **`getAllTechnicians()`** for the dropdown — so the list is **not** limited by skill or slot until the controller checks conflicts.
+**Staff assign UI** (`staff/assign_technicians.php`) loads **`getAllTechnicians()`** for the dropdown — so the list is **not** limited by skill or slot until the controller checks conflicts.  
+**Admin assign page** remains available as read-only oversight.
 
 ---
 
@@ -267,10 +268,10 @@ All three steps are wrapped in a **PDO transaction** in `UserController::jel_ims
   - Ranks by **workload** (count of `Assigned` + `Ongoing`), tie-break by lower `technicians.id`.
   - Calls `assignTechnician` inside a transaction.
 
-**Manual (Admin)**
+**Manual (Staff)**
 
 - `TechnicianController.php` when `$_POST['assign_technician']`:
-  - **Admin only** (`role_id === 1`).
+  - **Staff only** (`role_id === 2`).
   - Booking must be **`Unassigned`** and have no technician.
   - **`isTechnicianSlotTaken`** must be false (double-booking guard).
   - **`assignTechnician`** sets `Assigned` and audit fields.
@@ -333,7 +334,7 @@ All three steps are wrapped in a **PDO transaction** in `UserController::jel_ims
 | **Auto assign / skilled list** | SQL does not filter `users.status = 'Active'` — inactive accounts could still be candidates if rows remain. |
 | **Assign UI** | Uses all technicians, not “available” or “skilled for this service”. |
 | **Registration** | Weaker password rules than admin-created users (no min length in controller path). |
-| **Staff role** | Exists in DB and login redirect, but sidebar is minimal — clarify intended permissions vs Admin. |
+| **Staff role** | Operational role is now implemented (manage technicians, assignment, booking/customer operational views). |
 | **CSRF** | `UserController` comment notes no tokens; same pattern elsewhere — forms are vulnerable to cross-site POST in production. |
 | **Central RBAC** | Magic numbers for role IDs scattered; a single config or `Role` lookup would reduce drift. |
 

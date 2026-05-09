@@ -13,6 +13,7 @@ if ((int) $_SESSION['role_id'] !== 3) {
 }
 
 require_once __DIR__ . '/../../config/Database.php';
+require_once __DIR__ . '/../../models/Booking.php';
 
 $db = new Database();
 $pdo = $db->getConnection();
@@ -28,6 +29,8 @@ $technicianId = $techRow ? (int) $techRow['id'] : 0;
 $assignedCount = 0;
 $ongoingCount = 0;
 $completedCount = 0;
+$bookingModel = new Booking();
+$recentBookings = $bookingModel->getBookingsByTechnicianUser($userId);
 
 if ($technicianId > 0) {
     $stmt = $pdo->prepare('SELECT COUNT(*) FROM bookings WHERE technician_id = :tid AND status = :s');
@@ -84,6 +87,32 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <td><?php echo htmlspecialchars((string) $completedCount, ENT_QUOTES, 'UTF-8'); ?></td>
     </tr>
 </table>
+
+<h2>Assigned Booking List</h2>
+<?php if (count($recentBookings) === 0): ?>
+<p>No assigned bookings yet.</p>
+<?php else: ?>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Service</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Details</th>
+    </tr>
+    <?php foreach ($recentBookings as $rb): ?>
+    <tr>
+        <td><?php echo (int) $rb['id']; ?></td>
+        <td><?php echo htmlspecialchars((string) $rb['service_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars((string) $rb['booking_date'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars((string) $rb['time_value'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo htmlspecialchars((string) $rb['status'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><a href="booking_details.php?booking_id=<?php echo (int) $rb['id']; ?>">View booking</a></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
 
 </main>
 

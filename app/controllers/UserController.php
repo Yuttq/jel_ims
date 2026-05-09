@@ -7,7 +7,7 @@
  *
  * Planned POST dispatch field: `jel_action` (distinct name avoids collisions).
  * Dispatched POST `jel_action` values:
- *   • create_user       — Admin / Staff only (Step 3)
+ *   • create_user       — Disabled for this workflow (kept for compatibility)
  *   • create_technician — User + technician + technician_skills in one TX (Step 4)
  *   • update_user       — Edit profile + optional password; technician role locked; lone Active Admin guarded
  *   • set_status       — Soft delete (Inactive) / restore (Active); self + lone-admin + technician busy guards
@@ -37,16 +37,17 @@ function jel_ims_uc_admin_role_id(): int
 }
 
 /**
- * Abort unless an Admin session is active.
+ * Abort unless an Admin or Staff session is active.
  */
-function jel_ims_uc_require_admin_session(): void
+function jel_ims_uc_require_authorized_session(): void
 {
     if (empty($_SESSION['user_id']) || empty($_SESSION['role_id'])) {
         header('Location: ../views/auth/login.php');
         exit;
     }
 
-    if ((int) $_SESSION['role_id'] !== 1) {
+    $roleId = (int) $_SESSION['role_id'];
+    if ($roleId !== 1 && $roleId !== 2) {
         header('Location: ../views/auth/login.php?error=forbidden');
         exit;
     }
@@ -61,7 +62,9 @@ function jel_ims_uc_require_admin_session(): void
  */
 function jel_ims_uc_manage_users_url(array $query = []): string
 {
-    $base = '../views/admin/manage_users.php';
+    $base = ((int) ($_SESSION['role_id'] ?? 0) === 2)
+        ? '../views/staff/manage_technicians.php'
+        : '../views/admin/manage_users.php';
 
     if ($query === []) {
         return $base;
@@ -70,12 +73,30 @@ function jel_ims_uc_manage_users_url(array $query = []): string
     return $base . '?' . http_build_query($query);
 }
 
+function jel_ims_uc_is_admin(): bool
+{
+    return (int) ($_SESSION['role_id'] ?? 0) === 1;
+}
+
+function jel_ims_uc_is_staff(): bool
+{
+    return (int) ($_SESSION['role_id'] ?? 0) === 2;
+}
+
 /**
  * Step 3: create Admin or Staff (role_id 1 or 2). Status always Active.
  * Technician uses a separate transactional action in Step 4.
  */
 function jel_ims_uc_handle_create_admin_staff_user(User $userModel): void
 {
+    if (!jel_ims_uc_is_admin()) {
+        header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'forbidden']));
+        exit;
+    }
+
+    header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'create_disabled']));
+    exit;
+
     $full_name = isset($_POST['full_name']) ? trim((string) $_POST['full_name']) : '';
     $email = isset($_POST['email']) ? trim((string) $_POST['email']) : '';
     $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
@@ -147,6 +168,11 @@ function jel_ims_uc_handle_create_admin_staff_user(User $userModel): void
  */
 function jel_ims_uc_handle_create_technician_user(User $userModel, Technician $technicianModel, Service $serviceModel): void
 {
+    if (!jel_ims_uc_is_staff()) {
+        header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'forbidden']));
+        exit;
+    }
+
     $full_name = isset($_POST['tech_full_name']) ? trim((string) $_POST['tech_full_name']) : '';
     $email = isset($_POST['tech_email']) ? trim((string) $_POST['tech_email']) : '';
     $password = isset($_POST['tech_password']) ? (string) $_POST['tech_password'] : '';
@@ -289,6 +315,7 @@ function jel_ims_uc_handle_update_user(User $userModel, Technician $technicianMo
     }
 
     $retry = ['edit' => $user_id];
+    $actorIsStaff = jel_ims_uc_is_staff();
 
     $statusKeep = isset($existing['status']) ? (string) $existing['status'] : 'Active';
 
@@ -310,6 +337,10 @@ function jel_ims_uc_handle_update_user(User $userModel, Technician $technicianMo
     $technicianTech = jel_ims_uc_technician_role_id();
 
     $has_technician_row = $technicianModel->getTechnicianByUserId($user_id) !== false;
+    if ($actorIsStaff && !$has_technician_row) {
+        header('Location: ' . jel_ims_uc_manage_users_url(array_merge($retry, ['error' => 'staff_only_technician'])));
+        exit;
+    }
 
     $role_effective = $posted_role_id;
     if ($has_technician_row) {
@@ -327,7 +358,7 @@ function jel_ims_uc_handle_update_user(User $userModel, Technician $technicianMo
     $adminRole = jel_ims_uc_admin_role_id();
     $is_active = strcasecmp($statusKeep, 'Active') === 0;
 
-    if ($current_role === $adminRole && $is_active && $role_effective !== $adminRole) {
+    if (!$actorIsStaff && $current_role === $adminRole && $is_active && $role_effective !== $adminRole) {
         $activeAdminCount = $userModel->countActiveUsersWithRole($adminRole, 'Active');
         if ($activeAdminCount <= 1) {
             header('Location: ' . jel_ims_uc_manage_users_url(array_merge($retry, ['error' => 'edit_last_admin_role'])));
@@ -405,6 +436,13 @@ function jel_ims_uc_handle_set_user_status(User $userModel, Technician $technici
     }
 
     $current_status = isset($existing['status']) ? (string) $existing['status'] : '';
+    $actorIsStaff = jel_ims_uc_is_staff();
+    $techRowForStatus = $technicianModel->getTechnicianByUserId($target_id);
+
+    if ($actorIsStaff && $techRowForStatus === false) {
+        header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'staff_only_technician']));
+        exit;
+    }
 
     if ($current_status !== 'Active' && $current_status !== 'Inactive') {
         header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'status_unsupported']));
@@ -428,12 +466,12 @@ function jel_ims_uc_handle_set_user_status(User $userModel, Technician $technici
 
         $is_active_admin = ((int) ($existing['role_id'] ?? 0) === $adminRole && $is_active_now);
 
-        if ($is_active_admin && $userModel->countActiveUsersWithRole($adminRole, 'Active') <= 1) {
+        if (!$actorIsStaff && $is_active_admin && $userModel->countActiveUsersWithRole($adminRole, 'Active') <= 1) {
             header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'status_last_admin']));
             exit;
         }
 
-        $techRow = $technicianModel->getTechnicianByUserId($target_id);
+        $techRow = $techRowForStatus;
         if ($techRow !== false) {
             $technician_id = (int) ($techRow['id'] ?? 0);
             if ($technician_id > 0 && $bookingModel->countTechnicianBusyBookings($technician_id) > 0) {
@@ -459,7 +497,7 @@ function jel_ims_uc_handle_set_user_status(User $userModel, Technician $technici
     exit;
 }
 
-jel_ims_uc_require_admin_session();
+jel_ims_uc_require_authorized_session();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ' . jel_ims_uc_manage_users_url());
