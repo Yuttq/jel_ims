@@ -139,7 +139,7 @@ Log back in as admin:
 - [ ] **Operational oversight pages:** assignment/bookings/customer/technician pages load in read-only mode.
 - [ ] **Reports** hub opens; open **Technician workload**, **RFM-style report**, or other linked reports — pages render (empty tables are OK on a fresh DB).
 - [ ] **Notifications** opens.
-- [ ] **Manage Users** opens for account governance (Admin/Staff direct creation is disabled in current workflow).
+- [ ] **Manage Users** opens; Admin can create **Admin**, **Staff**, and **Technician** accounts (forms on page).
 
 ### E. Staff (role 2)
 

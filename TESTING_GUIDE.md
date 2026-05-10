@@ -102,7 +102,7 @@ Use a **future** booking date (`YYYY-MM-DD` strictly after today).
 | C1 | **Dashboard** | Loads without errors. |
 | C2 | **Assign Technicians page (read-only)** | Page opens and shows monitoring data; assignment/cancel actions are Staff-managed. |
 | C3 | **Operational oversight pages** | Staff pages (`view_bookings`, `customer_details`, `manage_technicians`) open under Admin in read-only mode. |
-| C4 | **Manage Users governance** | Page opens for account governance; Admin/Staff direct create actions are disabled in current workflow. |
+| C4 | **Manage Users** | Page opens; Admin can create Admin/Staff and Technician accounts via forms. |
 | C5 | **Reports** | Opens; open **Technician workload** and **RFM-style report** (and any links from Reports hub) — pages render; empty tables are OK on a fresh DB. |
 | C6 | **Notifications** | Opens. |
 | C7 | **Charts and summary cards** | Reports charts are visible, compact, and responsive (not full-screen stretched). |
@@ -114,8 +114,10 @@ Use an **Admin** session. Exact status values used by the app are **`Active`** a
 | Step | Action | Expected result |
 |------|--------|------------------|
 | MU1 | Sidebar → **Manage Users** | Page loads; **All users** table shows **ID, Name, Email, Role, Status, Created**, and **Actions**; **no password column** (view page source → no bcrypt-style hashes exposed). |
-| MU2 | Attempt direct account creation actions | Creation is disabled in current workflow; governance behavior remains available. |
-| MU3 | Edit user and status with safety guards | Existing protections continue to work (self-deactivate blocked, last active admin blocked, etc.). |
+| MU2 | **Add Admin or Staff** — create a Staff user | Success message; new row **`Active`** appears in the list. |
+| MU3 | **Add Admin or Staff** — reuse an existing email | Error path; no duplicate row. |
+| MU4 | **Add Technician** — pick **≥ one** skill and submit | Success message; row appears as Technician with **`technician_skills`**. |
+| MU5 | **Add Technician** — zero skills checked | Validation error; nothing committed. |
 | MU6 | **Edit** a non-technician user (`?edit=id`) — change name or email → **Save changes** | **User was updated successfully** message; table reflects changes; password unchanged if password fields left blank. |
 | MU7 | **Edit** a user that has a **technician** profile (`technicians.user_id`) | Role is **Technician** and locked (hidden `edit_role_id=3`); you can still update name/email/optional password. |
 | MU8 | **Deactivate** (**Inactive**) on any **Active** user except guarded cases below | **Account status was updated.** user shows **`Inactive`**; that account **cannot log in** (inactive message on login page). |

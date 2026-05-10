@@ -189,10 +189,10 @@ Many-to-many between **technician** and **service** (skill = able to perform tha
 
 **B) Admin creates Admin or Staff** — `UserController.php`, action `create_user`:
 
-- In the current workflow, direct account creation from this action is intentionally disabled.
-- Admin still handles governance/oversight, while operations are handled in Staff pages.
+- Allowed `role_id`: **1 or 2** only.
+- **Admin session only** (Staff cannot use this action).
 
-**C) Staff creates Technician** — `UserController.php`, action `create_technician`:
+**C) Admin or Staff creates Technician** — `UserController.php`, action `create_technician`:
 
 - Single **transaction**: insert `users` (role 3), insert `technicians`, insert **≥ 1** `technician_skills` rows.
 - Uses `createUserOnConnection`, `createTechnicianOnConnection`, `insertTechnicianSkillsOnConnection`.

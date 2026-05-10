@@ -7,7 +7,7 @@
  *
  * Planned POST dispatch field: `jel_action` (distinct name avoids collisions).
  * Dispatched POST `jel_action` values:
- *   • create_user       — Disabled for this workflow (kept for compatibility)
+ *   • create_user       — Admin only: create Admin or Staff (role_id 1 or 2)
  *   • create_technician — User + technician + technician_skills in one TX (Step 4)
  *   • update_user       — Edit profile + optional password; technician role locked; lone Active Admin guarded
  *   • set_status       — Soft delete (Inactive) / restore (Active); self + lone-admin + technician busy guards
@@ -94,9 +94,6 @@ function jel_ims_uc_handle_create_admin_staff_user(User $userModel): void
         exit;
     }
 
-    header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'create_disabled']));
-    exit;
-
     $full_name = isset($_POST['full_name']) ? trim((string) $_POST['full_name']) : '';
     $email = isset($_POST['email']) ? trim((string) $_POST['email']) : '';
     $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
@@ -168,7 +165,7 @@ function jel_ims_uc_handle_create_admin_staff_user(User $userModel): void
  */
 function jel_ims_uc_handle_create_technician_user(User $userModel, Technician $technicianModel, Service $serviceModel): void
 {
-    if (!jel_ims_uc_is_staff()) {
+    if (!jel_ims_uc_is_staff() && !jel_ims_uc_is_admin()) {
         header('Location: ' . jel_ims_uc_manage_users_url(['error' => 'forbidden']));
         exit;
     }
